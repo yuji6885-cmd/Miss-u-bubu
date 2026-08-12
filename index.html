@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Distance Between Us</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Caveat:wght@500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!--
+  ============================================================
+  PERSONALIZE ME
+  Everything you'll want to change lives in the CONFIG object
+  near the top of the <script> at the bottom of this file.
+  Look for "EDIT YOUR WORDS HERE".
+  ============================================================
+-->
+
+<style>
+  :root{
+    --void:#04050d;
+    --deep:#090c22;
+    --deep-2:#0d1230;
+    --panel: rgba(255,255,255,0.045);
+    --panel-strong: rgba(255,255,255,0.075);
+    --panel-border: rgba(255,255,255,0.10);
+    --gold:#f3d9a4;
+    --gold-soft: rgba(243,217,164,0.55);
+    --silver:#b9c6ff;
+    --silver-soft: rgba(185,198,255,0.55);
+    --glow:#fbf6ea;
+    --ink:#edeffb;
+    --ink-dim:#9aa1c4;
+    --ink-faint:#6a7096;
+    --serif: 'Cormorant Garamond', serif;
+    --hand: 'Caveat', cursive;
+    --sans: 'Inter', sans-serif;
+    --ease: cubic-bezier(.16,.84,.44,1);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--void);
+    color:var(--ink);
+    font-family:var(--serif);
+    overflow-x:hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  ::selection{ background: var(--silver-soft); color:#05060f; }
+
+  #journey{
+    height:100vh;
+    height:100dvh;
+    overflow-y:scroll;
+    overflow-x:hidden;
+    scroll-snap-type: y mandatory;
+    position:relative;
+  }
+  .chapter{
+    position:relative;
+    min-height:100vh;
+    min-height:100dvh;
+    width:100%;
+    scroll-snap-align:start;
+    scroll-snap-stop:always;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding: 8vh 6vw;
+    text-align:center;
+    overflow:hidden;
+  }
+
+  /* ---------- background layers ---------- */
+  #stars-canvas{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+  }
+  .void-gradient{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(30,38,90,0.35), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 50% 100%, rgba(20,16,40,0.5), transparent 60%),
+      linear-gradient(180deg, var(--void), var(--deep) 45%, var(--void));
+  }
+  .drift{
+    position:fixed; z-index:0; pointer-events:none; border-radius:50%;
+    filter: blur(50px); opacity:0.35;
+    animation: driftmove 34s ease-in-out infinite;
+  }
+  .drift.d1{ width:38vmax; height:38vmax; top:-10vmax; left:-12vmax; background:radial-gradient(circle, rgba(140,130,220,0.35), transparent 65%); }
+  .drift.d2{ width:44vmax; height:44vmax; bottom:-16vmax; right:-14vmax; background:radial-gradient(circle, rgba(90,110,200,0.3), transparent 65%); animation-duration:42s; animation-delay:-8s;}
+  .drift.d3{ width:30vmax; height:30vmax; top:40%; left:60%; background:radial-gradient(circle, rgba(243,217,164,0.14), transparent 65%); animation-duration:50s; animation-delay:-20s;}
+  @keyframes driftmove{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    50%{ transform:translate(4vmax,-3vmax) scale(1.08); }
+  }
+
+  .grain{
+    position:fixed; inset:0; z-index:1; pointer-events:none; opacity:0.035; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- shared type ---------- */
+  .eyebrow{
+    font-family:var(--sans); font-size:11px; letter-spacing:.32em; text-transform:uppercase;
+    color:var(--ink-faint); margin-bottom: 22px; opacity:0; transform:translateY(8px);
+    transition: opacity 1s var(--ease), transform 1s var(--ease);
+  }
+  .in-view .eyebrow{ opacity:1; transform:none; }
+
+  .line{
+    font-weight:300; line-height:1.35; font-size:clamp(22px,4.6vw,40px);
+    max-width: 760px; color:var(--ink);
+    opacity:0; transform:translateY(14px);
+    transition: opacity 1.1s var(--ease), transform 1.1s var(--ease);
+  }
+  .in-view .line{ opacity:1; transform:none; }
+  .line em{ font-style:italic; color:var(--gold); }
+  .sub{
+    font-family:var(--sans); font-weight:300; font-size:13px; letter-spacing:.06em;
+    color:var(--ink-faint); margin-top:26px; opacity:0; transition:opacity 1.4s var(--ease) .3s;
+  }
+  .in-view .sub{ opacity:1; }
+
+  .handwritten{
+    font-family:var(--hand); font-size: clamp(22px,4vw,30px); color: var(--gold);
+    line-height:1.5; font-weight:500;
+  }
+
+  /* ---------- glass ---------- */
+  .glass{
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border-radius: 18px;
+  }
+
+  /* ---------- progress rail ---------- */
+  #rail{
+    position:fixed; right: 18px; top:50%; transform:translateY(-50%);
+    z-index:40; display:flex; flex-direction:column; gap:14px;
+  }
+  #rail button{
+    width:8px; height:8px; border-radius:50%; border:1px solid var(--ink-faint);
+    background:transparent; padding:0; cursor:pointer; position:relative;
+    transition: all .5s var(--ease);
+  }
+  #rail button.active{ background: var(--gold); border-color:var(--gold); box-shadow:0 0 10px 1px var(--gold-soft); transform:scale(1.3); }
+  @media (max-width:640px){ #rail{ right:10px; gap:11px;} #rail button{ width:6px; height:6px; } }
+
+  /* ---------- audio control ---------- */
+  #audio-toggle{
+    position:fixed; left:18px; top:18px; z-index:40;
+    width:44px; height:44px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:var(--ink-dim); font-family:var(--sans);
+    transition: color .4s var(--ease), box-shadow .4s var(--ease);
+  }
+  #audio-toggle:hover{ color:var(--ink); }
+  #audio-toggle svg{ width:16px; height:16px; }
+  #audio-toggle.playing{ box-shadow:0 0 0 1px var(--gold-soft), 0 0 18px 2px rgba(243,217,164,0.18); color:var(--gold); }
+
+  /* ---------- generic star dot ---------- */
+  .star{
+    position:absolute; border-radius:50%;
+    background: radial-gradient(circle, var(--glow) 0%, currentColor 40%, transparent 72%);
+    box-shadow: 0 0 14px 3px currentColor;
+  }
+  .star.gold{ color: var(--gold); }
+  .star.silver{ color: var(--silver); }
+  @media (prefers-reduced-motion: no-preference){
+    .twinkle{ animation: twinkle 3.4s ease-in-out infinite; }
+  }
+  @keyframes twinkle{ 0%,100%{ opacity:1; filter:brightness(1);} 50%{ opacity:.55; filter:brightness(1.4);} }
+
+  /* ====================== CHAPTER 1 — TONIGHT ====================== */
+  #ch-opening .stars-wrap{ position:absolute; inset:0; }
+  #ch-opening .star{ width:6px; height:6px; }
+  #ch-opening .s-left{ top:38%; left:16%; }
+  #ch-opening .s-right{ top:62%; right:14%; }
+
+  .begin-star{
+    width:14px; height:14px; cursor:pointer; z-index:5;
+    animation: twinkle 2.6s ease-in-out infinite, pulseRing 2.6s ease-in-out infinite;
+  }
+  @keyframes pulseRing{
+    0%,100%{ box-shadow:0 0 14px 3px currentColor; }
+    50%{ box-shadow:0 0 26px 8px currentColor; }
+  }
+  .begin-hint{
+    position:absolute; font-family:var(--sans); font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--ink-faint); text-align:center; width:180px; left:50%; transform:translateX(-50%);
+    opacity:0; transition:opacity 1s ease;
+  }
+  #ch-opening.ready .begin-hint{ opacity:1; }
+
+  /* ====================== CHAPTER 2 — DISTANCE ====================== */
+  #ch-distance .field{
+    position:relative; width:100%; max-width:640px; height:min(48vh,340px);
+    margin: 40px auto 0;
+  }
+  .drag-star{
+    position:absolute; width:22px; height:22px; touch-action:none; cursor:grab;
+    z-index:6; transition: box-shadow .4s ease;
+  }
+  .drag-star:active{ cursor:grabbing; }
+  .drag-star .label{
+    position:absolute; top:calc(100% + 10px); left:50%; transform:translateX(-50%);
+    font-family:var(--sans); font-size:10px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--ink-faint); white-space:nowrap;
+  }
+  .thread-line{
+    position:absolute; height:1px; top:0; left:0; transform-origin: 0 50%;
+    background: linear-gradient(90deg, var(--silver-soft), var(--gold-soft));
+    opacity:0.5; z-index:2; pointer-events:none;
+  }
+  .distance-reveal{
+    margin-top: 30px; max-width: 560px; font-size: clamp(19px,3.6vw,26px);
+    font-style:italic; color: var(--ink); opacity:0; transform:translateY(10px);
+    transition: opacity 1s var(--ease), transform 1s var(--ease); min-height: 2.6em;
+  }
+  .distance-reveal.shown{ opacity:1; transform:none; }
+  .distance-meta{ font-family:var(--sans); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); margin-top:18px; }
+
+  /* ====================== CHAPTER 3 — MEMORIES ====================== */
+  #ch-memories .memory-field{
+    position:relative; width:100%; max-width: 920px; margin-top:34px;
+    display:grid; grid-template-columns: repeat(3,1fr); gap: 18px;
+  }
+  @media (max-width:760px){ #ch-memories .memory-field{ grid-template-columns: repeat(2,1fr); gap:12px;} }
+  .mem-card{
+    position:relative; height: 148px; border-radius:16px; cursor:pointer;
+    perspective: 900px;
+  }
+  @media (prefers-reduced-motion: no-preference){
+    .mem-card{ animation: floaty 6s ease-in-out infinite; }
+    .mem-card:nth-child(2n){ animation-duration:7.2s; animation-delay:-1.4s; }
+    .mem-card:nth-child(3n){ animation-duration:5.4s; animation-delay:-2.6s; }
+  }
+  @keyframes floaty{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-8px);} }
+  .mem-inner{
+    position:relative; width:100%; height:100%; text-align:left;
+    transition: transform .7s var(--ease);
+    transform-style: preserve-3d;
+  }
+  .mem-card.open .mem-inner{ transform: rotateY(180deg); }
+  .mem-face{
+    position:absolute; inset:0; border-radius:16px; padding:16px;
+    backface-visibility:hidden; display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .mem-front{ background:var(--panel); border:1px solid var(--panel-border); backdrop-filter:blur(14px); }
+  .mem-front .glyph{ font-size:20px; color:var(--gold); opacity:.9; }
+  .mem-front .tag{ font-family:var(--sans); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-dim); }
+  .mem-back{
+    background: linear-gradient(160deg, rgba(30,26,54,0.92), rgba(10,12,30,0.94));
+    border:1px solid var(--gold-soft); transform: rotateY(180deg);
+    display:flex; align-items:center; justify-content:center; text-align:center; padding:14px;
+  }
+  .mem-back p{ font-family:var(--hand); font-size: clamp(16px,3.4vw,20px); color:var(--gold); line-height:1.35; margin:0; }
+
+  /* ====================== CHAPTER 4 — IF YOU WERE HERE ====================== */
+  #ch-room{ padding-bottom: 10vh; }
+  .room{
+    position:relative; width:min(90vw,560px); height: min(42vh,300px);
+    margin-top: 24px;
+  }
+  .room-floor{
+    position:absolute; left:0; right:0; bottom:0; height:55%;
+    background: linear-gradient(180deg, rgba(20,22,46,0.0), rgba(10,12,26,0.75));
+    border-radius: 0 0 20px 20px;
+  }
+  .seat{
+    position:absolute; bottom: 8%; width: 88px; height:112px;
+  }
+  .seat.occupied{ left: 18%; }
+  .seat.empty{ right: 18%; cursor:pointer; }
+  .seat-shape{
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(180,190,230,0.16), rgba(120,130,180,0.05));
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius: 14px 14px 6px 6px;
+    transition: box-shadow .8s ease, border-color .8s ease, background .8s ease;
+  }
+  .seat.occupied .seat-shape{
+    background: linear-gradient(180deg, rgba(243,217,164,0.14), rgba(243,217,164,0.02));
+    box-shadow: 0 0 30px 6px rgba(243,217,164,0.08);
+    border-color: rgba(243,217,164,0.18);
+  }
+  .seat.empty.lit .seat-shape{
+    background: linear-gradient(180deg, rgba(185,198,255,0.22), rgba(185,198,255,0.03));
+    box-shadow: 0 0 42px 10px rgba(185,198,255,0.18);
+    border-color: rgba(185,198,255,0.35);
+  }
+  .seat-glow-hint{
+    position:absolute; inset:-30%; border-radius:50%;
+    background: radial-gradient(circle, rgba(185,198,255,0.0), transparent 70%);
+    transition: background 1s ease; pointer-events:none;
+  }
+  .seat.empty.lit .seat-glow-hint{ background: radial-gradient(circle, rgba(185,198,255,0.16), transparent 70%); }
+  .room-reveal{
+    margin-top: 30px; font-style:italic; font-size: clamp(18px,3.4vw,24px);
+    opacity:0; transform:translateY(8px); transition: opacity 1s var(--ease), transform 1s var(--ease);
+    min-height: 1.6em;
+  }
+  .room-reveal.shown{ opacity:1; transform:none; }
+  .room-hint{ font-family:var(--sans); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); margin-top:16px; }
+
+  /* ====================== CHAPTER 5 — EVERY SECOND ====================== */
+  .clock-wrap{ position:relative; width: min(56vw,220px); height:min(56vw,220px); margin-top:30px; }
+  .clock-wrap svg{ width:100%; height:100%; overflow:visible; }
+  .clock-ring{ fill:none; stroke: rgba(255,255,255,0.12); stroke-width:1; }
+  .clock-tick{ stroke: rgba(255,255,255,0.22); stroke-width:1; }
+  .clock-hand{ stroke: var(--gold); stroke-width:1.4; stroke-linecap:round; transform-origin:100px 100px; }
+  @media (prefers-reduced-motion: no-preference){
+    .clock-hand.second{ animation: spin 24s linear infinite; }
+    .orbit-dot{ animation: spin 24s linear infinite; }
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .orbit-dot{ transform-origin:100px 100px; }
+  .clock-center{ fill: var(--gold); }
+  .clock-caption{ margin-top:30px; }
+
+  /* ====================== CHAPTER 6 — FINAL JOURNEY ====================== */
+  #ch-final{ overflow:hidden; }
+  .final-stars{ position:relative; width:100%; max-width:520px; height: 90px; }
+  .final-star{ width:12px; height:12px; top:50%; margin-top:-6px; }
+  .final-star.gold{ left:6%; }
+  .final-star.silver{ right:6%; }
+  #ch-final.merged .final-star.gold{ left:50%; transform: translateX(-50%); }
+  #ch-final.merged .final-star.silver{ right:50%; transform: translateX(50%); }
+  .final-star{ transition: left 2.6s var(--ease), right 2.6s var(--ease), transform 2.6s var(--ease); }
+  .final-flash{
+    position:absolute; inset:-50%; border-radius:50%; pointer-events:none;
+    background: radial-gradient(circle, rgba(255,250,235,0.0) 0%, transparent 60%);
+    transition: background 1.1s ease;
+  }
+  #ch-final.merged .final-flash{ background: radial-gradient(circle, rgba(255,250,235,0.55) 0%, transparent 55%); }
+
+  .final-lines{ margin-top: 40px; max-width: 560px; }
+  .final-lines p{
+    font-weight:300; font-style:italic; font-size: clamp(18px,3.6vw,26px);
+    margin: 0 0 14px; opacity:0; transform:translateY(10px);
+    transition: opacity 1s var(--ease), transform 1s var(--ease);
+  }
+  #ch-final.merged .final-lines p{ opacity:1; transform:none; }
+  #ch-final.merged .final-lines p:nth-child(1){ transition-delay: .3s; }
+  #ch-final.merged .final-lines p:nth-child(2){ transition-delay: .8s; }
+  #ch-final.merged .final-lines p:nth-child(3){ transition-delay: 1.3s; }
+  #ch-final.merged .final-lines p:nth-child(4){ transition-delay: 1.8s; }
+  #ch-final.merged .final-lines p:nth-child(5){ transition-delay: 2.3s; }
+
+  .btn{
+    font-family:var(--sans); font-size:12px; letter-spacing:.16em; text-transform:uppercase;
+    color: var(--ink); background: var(--panel); border:1px solid var(--panel-border);
+    padding: 15px 30px; border-radius: 999px; cursor:pointer;
+    transition: all .5s var(--ease); backdrop-filter: blur(12px);
+  }
+  .btn:hover{ border-color: var(--gold-soft); color: var(--gold); box-shadow: 0 0 24px rgba(243,217,164,0.12); }
+  .btn:active{ transform: scale(.96); }
+
+  #last-thing-wrap{
+    margin-top:52px; opacity:0; pointer-events:none; transition: opacity 1.2s ease 2.8s;
+  }
+  #ch-final.merged #last-thing-wrap{ opacity:1; pointer-events:auto; }
+
+  /* ====================== LETTER OVERLAY ====================== */
+  #letter{
+    position:fixed; inset:0; z-index:60;
+    display:flex; align-items:center; justify-content:center;
+    padding: 8vh 6vw;
+    background: radial-gradient(ellipse at 50% 20%, rgba(40,34,70,0.55), var(--void) 70%);
+    opacity:0; visibility:hidden; transition: opacity 1s var(--ease);
+  }
+  #letter.open{ opacity:1; visibility:visible; }
+  .letter-card{
+    max-width: 640px; max-height: 82vh; overflow-y:auto;
+    padding: 46px 38px; text-align:left;
+    position:relative;
+  }
+  .letter-card::-webkit-scrollbar{ width:4px; }
+  .letter-card::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.14); border-radius:4px; }
+  .letter-sign{ font-family:var(--hand); font-size:22px; color:var(--ink-faint); margin-bottom:18px; display:block; }
+  .letter-body{
+    font-family:var(--hand); font-size: clamp(20px,3.6vw,26px); color: var(--ink);
+    line-height:1.75; white-space:pre-wrap;
+  }
+  .letter-actions{
+    display:flex; gap:14px; justify-content:center; flex-wrap:wrap;
+    margin-top: 36px;
+  }
+  .close-letter{
+    position:absolute; top:14px; right:18px; background:none; border:none;
+    color: var(--ink-faint); font-family:var(--sans); font-size:20px; cursor:pointer;
+    line-height:1;
+  }
+  .close-letter:hover{ color: var(--ink); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; animation-iteration-count:1 !important; transition-duration:.2s !important; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+<div class="void-gradient"></div>
+<div class="drift d1"></div>
+<div class="drift d2"></div>
+<div class="drift d3"></div>
+<div class="grain"></div>
+
+<button id="audio-toggle" aria-label="Toggle ambient music">
+  <svg id="audio-icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" style="display:none">
+    <path d="M9 6v12l-5-4H2V10h2l5-4z" fill="currentColor" stroke="none"/>
+    <path d="M15.5 8.5a4 4 0 010 7"/><path d="M18 6a8 8 0 010 12"/>
+  </svg>
+  <svg id="audio-icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+    <path d="M9 6v12l-5-4H2V10h2l5-4z" fill="currentColor" stroke="none"/>
+    <path d="M16 9l5 6M21 9l-5 6"/>
+  </svg>
+</button>
+
+<nav id="rail" aria-label="Journey progress"></nav>
+
+<div id="journey">
+
+  <!-- CHAPTER 1 — TONIGHT -->
+  <section class="chapter" id="ch-opening" data-title="Tonight">
+    <div class="stars-wrap">
+      <div class="star gold twinkle s-left" style="width:5px;height:5px;"></div>
+      <div class="star silver twinkle s-right" style="width:5px;height:5px;"></div>
+    </div>
+    <p class="eyebrow">I. Tonight</p>
+    <p class="line">I wanted to tell you something<span style="opacity:.6">&hellip;</span><br>but words felt too small.</p>
+    <div style="position:relative; width:100%; height:70px; margin-top:38px;">
+      <div class="star gold begin-star" id="begin-star" role="button" tabindex="0" aria-label="Begin the journey" style="left:50%; top:0; transform:translateX(-50%);"></div>
+      <p class="begin-hint" style="top:26px;">touch the star to begin</p>
+    </div>
+  </section>
+
+  <!-- CHAPTER 2 — THE DISTANCE -->
+  <section class="chapter" id="ch-distance" data-title="The Distance">
+    <p class="eyebrow">II. The Distance</p>
+    <p class="line" style="font-size:clamp(18px,3.4vw,24px);">Two stars. Far apart.<br>Bring them closer.</p>
+    <div class="field" id="distance-field">
+      <div class="thread-line" id="thread-line"></div>
+      <div class="drag-star gold star twinkle" id="star-you" style="top:20%; left:8%;"><span class="label">You</span></div>
+      <div class="drag-star silver star twinkle" id="star-me" style="top:64%; left:78%;"><span class="label">Me</span></div>
+    </div>
+    <p class="distance-reveal" id="distance-text">No matter how far you are&hellip; somehow you're always the closest person to my heart.</p>
+    <p class="distance-meta" id="distance-meta">drag a star toward the other</p>
+  </section>
+
+  <!-- CHAPTER 3 — THINGS THAT REMIND ME OF YOU -->
+  <section class="chapter" id="ch-memories" data-title="Things That Remind Me of You">
+    <p class="eyebrow">III. Things That Remind Me of You</p>
+    <p class="line" style="font-size:clamp(18px,3.4vw,24px); max-width:600px;">Small, ordinary things &mdash;<br>that somehow all lead back to you.</p>
+    <div class="memory-field" id="memory-field"></div>
+  </section>
+
+  <!-- CHAPTER 4 — IF YOU WERE HERE -->
+  <section class="chapter" id="ch-room" data-title="If You Were Here">
+    <p class="eyebrow">IV. If You Were Here&hellip;</p>
+    <p class="line" style="font-size:clamp(18px,3.4vw,24px);">It's quiet tonight.<br>There's a seat that's still empty.</p>
+    <div class="room">
+      <div class="room-floor"></div>
+      <div class="seat occupied"><div class="seat-shape"></div></div>
+      <div class="seat empty" id="empty-seat" role="button" tabindex="0" aria-label="Touch the empty seat">
+        <div class="seat-glow-hint"></div>
+        <div class="seat-shape"></div>
+      </div>
+    </div>
+    <p class="room-reveal" id="room-text">This is where I'd want you to be.</p>
+    <p class="room-hint" id="room-hint">touch the empty seat</p>
+  </section>
+
+  <!-- CHAPTER 5 — EVERY SECOND -->
+  <section class="chapter" id="ch-clock" data-title="Every Second">
+    <p class="eyebrow">V. Every Second</p>
+    <div class="clock-wrap">
+      <svg viewBox="0 0 200 200">
+        <circle class="clock-ring" cx="100" cy="100" r="92"/>
+        <g id="ticks"></g>
+        <line class="clock-hand second" x1="100" y1="100" x2="100" y2="26"/>
+        <circle class="orbit-dot" cx="100" cy="18" r="2.4" fill="#f3d9a4"/>
+        <circle class="clock-center" cx="100" cy="100" r="3"/>
+      </svg>
+    </div>
+    <p class="line clock-caption" style="font-size:clamp(18px,3.4vw,24px);">Every second is one second closer<br>to seeing you.</p>
+  </section>
+
+  <!-- CHAPTER 6 — FINAL JOURNEY -->
+  <section class="chapter" id="ch-final" data-title="Every Second">
+    <p class="eyebrow">VI. Every Star Finds Its Way</p>
+    <div class="final-stars">
+      <div class="final-flash"></div>
+      <div class="star gold final-star twinkle"></div>
+      <div class="star silver final-star twinkle"></div>
+    </div>
+    <div class="final-lines">
+      <p>I don't just miss talking to you.</p>
+      <p>I miss your presence.</p>
+      <p>I miss the little things.</p>
+      <p>I miss having you close.</p>
+      <p>And if I could choose one place to be tonight&hellip; it would be beside you.</p>
+    </div>
+    <div id="last-thing-wrap">
+      <button class="btn" id="last-thing-btn">One last thing&hellip;</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- LETTER OVERLAY -->
+<div id="letter">
+  <div class="letter-card glass">
+    <button class="close-letter" id="close-letter" aria-label="Close letter">&times;</button>
+    <span class="letter-sign" id="letter-signoff-top">for you &mdash;</span>
+    <div class="letter-body" id="letter-body"></div>
+    <div class="letter-actions">
+      <button class="btn" id="replay-btn">Replay the journey</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     EDIT YOUR WORDS HERE
+     Change any of the text below to personalize the site.
+  ============================================================ */
+  const CONFIG = {
+    memories: [
+      { glyph:"♪", tag:"A Song", note:"That one song that comes on and suddenly I'm right back with you, every time." },
+      { glyph:"❝", tag:"A Conversation", note:"The one that started as nothing and somehow lasted till 2am, and I never wanted it to end." },
+      { glyph:"⟡", tag:"A Place", note:"That place we went once — I still can't pass it without thinking of you." },
+      { glyph:"◐", tag:"A Time", note:"That one evening, nothing special happened, and it's still one of my favorite memories." },
+      { glyph:"✧", tag:"A Small Memory", note:"The way you laughed at your own joke before you even finished telling it." },
+      { glyph:"☾", tag:"Something Else", note:"Every quiet moment before sleep, I find myself talking to you in my head." }
+    ],
+    letter: `My love,
+
+If you've made it this far, you already know — this isn't really about stars, or seats, or seconds. It's about you.
+
+I built this because "I miss you" never felt like enough. So here it is: a little world, made of everything that reminds me of you, so that for a few minutes, the distance between us feels a little smaller.
+
+Wherever you are tonight, I hope you feel this the way I meant it.
+
+Yours, always.`
+  };
+  /* ============================================================ */
+
+  const $ = (sel, ctx) => (ctx||document).querySelector(sel);
+  const $$ = (sel, ctx) => Array.from((ctx||document).querySelectorAll(sel));
+  const vibrate = (ms) => { if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } };
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- starfield canvas ---------------- */
+  const canvas = $('#stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function resizeCanvas(){
+    canvas.width = window.innerWidth * devicePixelRatio;
+    canvas.height = window.innerHeight * devicePixelRatio;
+    canvas.style.width = window.innerWidth+'px';
+    canvas.style.height = window.innerHeight+'px';
+    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    const count = Math.min(160, Math.floor((window.innerWidth*window.innerHeight)/9000));
+    stars = Array.from({length:count}, () => ({
+      x: Math.random()*window.innerWidth,
+      y: Math.random()*window.innerHeight,
+      r: Math.random()*1.3 + 0.3,
+      base: Math.random()*0.5 + 0.3,
+      speed: Math.random()*0.015 + 0.004,
+      phase: Math.random()*Math.PI*2
+    }));
+  }
+  let t = 0;
+  function drawStars(){
+    ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+    for(const s of stars){
+      const alpha = reducedMotion ? s.base : s.base + Math.sin(t*s.speed*10 + s.phase)*0.28;
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(240,242,255,${Math.max(0.08,alpha)})`;
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+    t++;
+    requestAnimationFrame(drawStars);
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  drawStars();
+
+  /* ---------------- chapters / scroll progress ---------------- */
+  const journey = $('#journey');
+  const chapters = $$('.chapter');
+  const rail = $('#rail');
+  chapters.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.setAttribute('aria-label', 'Go to ' + (c.dataset.title||('chapter '+(i+1))));
+    b.addEventListener('click', () => { c.scrollIntoView({behavior:'smooth'}); vibrate(8); });
+    rail.appendChild(b);
+  });
+  const railButtons = $$('button', rail);
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        e.target.classList.add('in-view');
+        const idx = chapters.indexOf(e.target);
+        railButtons.forEach((b,i) => b.classList.toggle('active', i===idx));
+      }
+    });
+  }, { threshold: 0.5, root: journey });
+  chapters.forEach(c => io.observe(c));
+
+  /* ---------------- ambient audio (generated, no file needed) ---------------- */
+  let audioCtx, master, playing = false, padNodes = [];
+  function initAudio(){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    master = audioCtx.createGain();
+    master.gain.value = 0;
+    master.connect(audioCtx.destination);
+
+    const freqs = [98, 146.83, 220, 293.66]; // soft low chord (G2 D3 A3 D4)
+    padNodes = freqs.map((f, i) => {
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      const g = audioCtx.createGain();
+      g.gain.value = 0.22 / (i+1);
+      const lfo = audioCtx.createOscillator();
+      lfo.frequency.value = 0.05 + i*0.02;
+      const lfoGain = audioCtx.createGain();
+      lfoGain.gain.value = 3;
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
+      osc.connect(g);
+      g.connect(master);
+      osc.start(); lfo.start();
+      return {osc, lfo, g};
+    });
+  }
+  const audioToggle = $('#audio-toggle');
+  const iconOn = $('#audio-icon-on');
+  const iconOff = $('#audio-icon-off');
+  audioToggle.addEventListener('click', () => {
+    if(!audioCtx) initAudio();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    playing = !playing;
+    master.gain.cancelScheduledValues(audioCtx.currentTime);
+    master.gain.linearRampToValueAtTime(playing ? 1 : 0, audioCtx.currentTime + 1.2);
+    audioToggle.classList.toggle('playing', playing);
+    iconOn.style.display = playing ? 'block' : 'none';
+    iconOff.style.display = playing ? 'none' : 'block';
+    vibrate(10);
+  });
+
+  /* ---------------- Chapter 1: begin star ---------------- */
+  const chOpening = $('#ch-opening');
+  const beginStar = $('#begin-star');
+  setTimeout(() => chOpening.classList.add('ready'), 1400);
+  function beginJourney(){
+    vibrate(14);
+    $('#ch-distance').scrollIntoView({behavior:'smooth'});
+  }
+  beginStar.addEventListener('click', beginJourney);
+  beginStar.addEventListener('keydown', (e) => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); beginJourney(); } });
+
+  /* ---------------- Chapter 2: draggable stars ---------------- */
+  const field = $('#distance-field');
+  const starYou = $('#star-you');
+  const starMe = $('#star-me');
+  const thread = $('#thread-line');
+  const distanceText = $('#distance-text');
+  const distanceMeta = $('#distance-meta');
+  let revealed = false;
+
+  function pos(el){
+    const fr = field.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width/2 - fr.left, y: r.top + r.height/2 - fr.top, fr };
+  }
+  function updateThread(){
+    const a = pos(starYou), b = pos(starMe);
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const dist = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx) * 180/Math.PI;
+    thread.style.width = dist + 'px';
+    thread.style.left = a.x + 'px';
+    thread.style.top = a.y + 'px';
+    thread.style.transform = `rotate(${angle}deg)`;
+
+    const maxDist = Math.hypot(a.fr.width, a.fr.height);
+    const ratio = dist / maxDist;
+    if(ratio < 0.24 && !revealed){
+      revealed = true;
+      distanceText.classList.add('shown');
+      distanceMeta.textContent = 'close enough to feel it';
+      starYou.style.boxShadow = '0 0 30px 10px currentColor';
+      starMe.style.boxShadow = '0 0 30px 10px currentColor';
+      vibrate(18);
+    } else if(ratio >= 0.24 && revealed){
+      revealed = false;
+      distanceText.classList.remove('shown');
+      distanceMeta.textContent = 'drag a star toward the other';
+      starYou.style.boxShadow = '';
+      starMe.style.boxShadow = '';
+    }
+  }
+
+  function makeDraggable(el){
+    let dragging = false, offX=0, offY=0;
+    function toLocal(clientX, clientY){
+      const fr = field.getBoundingClientRect();
+      let x = clientX - fr.left - offX;
+      let y = clientY - fr.top - offY;
+      x = Math.max(0, Math.min(fr.width - el.offsetWidth, x));
+      y = Math.max(0, Math.min(fr.height - el.offsetHeight, y));
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+    }
+    function start(clientX, clientY){
+      dragging = true;
+      const r = el.getBoundingClientRect();
+      offX = clientX - r.left; offY = clientY - r.top;
+      el.style.cursor='grabbing';
+    }
+    function move(clientX, clientY){
+      if(!dragging) return;
+      toLocal(clientX, clientY);
+      updateThread();
+    }
+    function end(){ dragging=false; el.style.cursor='grab'; }
+
+    el.addEventListener('pointerdown', (e) => { el.setPointerCapture(e.pointerId); start(e.clientX, e.clientY); });
+    el.addEventListener('pointermove', (e) => move(e.clientX, e.clientY));
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+  }
+  makeDraggable(starYou);
+  makeDraggable(starMe);
+  window.addEventListener('resize', updateThread);
+  const distObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) setTimeout(updateThread, 60); });
+  }, {threshold:0.4});
+  distObserver.observe($('#ch-distance'));
+
+  /* ---------------- Chapter 3: memory cards ---------------- */
+  const memField = $('#memory-field');
+  CONFIG.memories.forEach((m) => {
+    const card = document.createElement('div');
+    card.className = 'mem-card';
+    card.setAttribute('role','button');
+    card.setAttribute('tabindex','0');
+    card.setAttribute('aria-label', m.tag);
+    card.innerHTML = `
+      <div class="mem-inner">
+        <div class="mem-face mem-front">
+          <div class="glyph">${m.glyph}</div>
+          <div class="tag">${m.tag}</div>
+        </div>
+        <div class="mem-face mem-back"><p>${m.note}</p></div>
+      </div>`;
+    function toggle(){ card.classList.toggle('open'); vibrate(10); }
+    card.addEventListener('click', toggle);
+    card.addEventListener('keydown', (e) => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
+    memField.appendChild(card);
+  });
+
+  /* ---------------- Chapter 4: empty seat ---------------- */
+  const emptySeat = $('#empty-seat');
+  const roomText = $('#room-text');
+  const roomHint = $('#room-hint');
+  function lightSeat(){
+    emptySeat.classList.add('lit');
+    roomText.classList.add('shown');
+    roomHint.style.opacity = '0';
+    vibrate(16);
+  }
+  emptySeat.addEventListener('click', lightSeat);
+  emptySeat.addEventListener('keydown', (e) => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); lightSeat(); } });
+
+  /* ---------------- Chapter 5: clock ticks ---------------- */
+  const ticksGroup = $('#ticks');
+  for(let i=0;i<60;i++){
+    const angle = (i/60) * Math.PI * 2;
+    const long = i % 5 === 0;
+    const r1 = long ? 78 : 84;
+    const r2 = 92;
+    const x1 = 100 + r1*Math.sin(angle), y1 = 100 - r1*Math.cos(angle);
+    const x2 = 100 + r2*Math.sin(angle), y2 = 100 - r2*Math.cos(angle);
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x1); line.setAttribute('y1',y1);
+    line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+    line.setAttribute('class','clock-tick');
+    if(long) line.style.opacity = '0.5';
+    ticksGroup.appendChild(line);
+  }
+
+  /* ---------------- Chapter 6: final merge ---------------- */
+  const chFinal = $('#ch-final');
+  const finalObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        setTimeout(() => { chFinal.classList.add('merged'); vibrate(22); }, 500);
+      }
+    });
+  }, {threshold:0.6});
+  finalObserver.observe(chFinal);
+
+  /* ---------------- Letter overlay ---------------- */
+  const letterOverlay = $('#letter');
+  const letterBody = $('#letter-body');
+  letterBody.textContent = CONFIG.letter;
+  $('#last-thing-btn').addEventListener('click', () => {
+    letterOverlay.classList.add('open');
+    vibrate(20);
+  });
+  $('#close-letter').addEventListener('click', () => letterOverlay.classList.remove('open'));
+
+  $('#replay-btn').addEventListener('click', () => {
+    letterOverlay.classList.remove('open');
+    chFinal.classList.remove('merged');
+    revealed = false;
+    distanceText.classList.remove('shown');
+    starYou.style.left = '8%'; starYou.style.top='20%';
+    starMe.style.left = '78%'; starMe.style.top='64%';
+    starYou.style.boxShadow=''; starMe.style.boxShadow='';
+    emptySeat.classList.remove('lit');
+    roomText.classList.remove('shown');
+    roomHint.style.opacity = '1';
+    $$('.mem-card').forEach(c => c.classList.remove('open'));
+    chOpening.scrollIntoView({behavior:'smooth'});
+    setTimeout(updateThread, 500);
+  });
+
+})();
+</script>
+</body>
+</html>
+
